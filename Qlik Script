@@ -1,0 +1,20 @@
+Sub Mapping
+
+// ISSN.org query available upon request, a set extracted on 2025-06-10 and used as below
+
+ISSN:
+LOAD
+    ISSN,
+    "ISSN-L"
+FROM [lib://UKBsis_XLS/1.4  JOURNALS/1.4.3  ISSN_ORG/20250610.ISSN-to-ISSN-L.txt]
+(txt, codepage is 28591, embedded labels, delimiter is '\t', msq);
+
+ISSN_Map:
+Mapping Load
+    ISSN,
+    "ISSN-L"
+FROM [lib://UKBsis_XLS/1.4  JOURNALS/1.4.3  ISSN_ORG/20250610.ISSN-to-ISSN-L.txt]
+(txt, codepage is 28591, embedded labels, delimiter is '\t', msq);
+
+End Sub
+
