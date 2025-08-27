@@ -46,7 +46,6 @@ Each script is modular:
 - **D** → Bronze/Closed  
 - Institute-returned corrections can override (Step 2b).  
 
-See [`docs/business_rules.md`](docs/business_rules.md) for details.
 
 ---
 
@@ -59,7 +58,6 @@ See [`docs/business_rules.md`](docs/business_rules.md) for details.
 - **Institute Reports** (Excel corrections returned by institutions)  
 - **UKBsis QVD Snapshots** (Publisher report DOIs, journal facts)
 
-Details in [`docs/data_sources.md`](docs/data_sources.md).
 
 
 
