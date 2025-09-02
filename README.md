@@ -59,9 +59,8 @@ Each script is modular:
 - **UKBsis QVD Snapshots** (Publisher report DOIs, journal facts)
 
 ## 📂 Datasets and Resources 
-https://zenodo.org/api/records/16962476/draft/files/Initial%20Output%202024%20for%20OA%20analysis%20Template.csv
-https://zenodo.org/api/records/16962476/draft/files/Send%20Back%20Template%20OA%20monitor%20UKBsis.xlsx
-https://zenodo.org/api/records/16962476/draft/files/FLOW%20OA%20Monitor.png
-
+https://zenodo.org/api/records/16962476/draft/files/Send%20Back%20Template%20OA%20monitor%20UKBsis.xlsx/content
+https://zenodo.org/api/records/16962476/draft/files/FLOW%20OA%20Monitor.png/content
+https://zenodo.org/api/records/16962476/draft/files/Initial%20Output%202024%20for%20OA%20analysis%20Template.csv/content
 
 
