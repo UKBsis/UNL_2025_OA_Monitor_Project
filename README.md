@@ -44,7 +44,10 @@ Each script is modular:
 - **B** → Gold/Hybrid verified by UKBsis Publisher Reports  
 - **C** → Green (repository copy)  
 - **D** → Bronze/Closed  
-- Institute-returned corrections can override (Step 2b).  
+- Institute-returned corrections can override (Step 2b).
+
+
+
 
 
 ---
@@ -63,4 +66,5 @@ https://zenodo.org/api/records/16962476/draft/files/Send%20Back%20Template%20OA%
 https://zenodo.org/api/records/16962476/draft/files/FLOW%20OA%20Monitor.png/content
 https://zenodo.org/api/records/16962476/draft/files/Initial%20Output%202024%20for%20OA%20analysis%20Template.csv/content
 
+✍️ Maintained by UKBsis OA Monitor Project Team
 
