@@ -2,7 +2,7 @@
 # OA Monitor Qlik Scripts
 
 This repository contains Qlik Sense ETL scripts used in the **UKB OA Monitor Project**.  
-It consolidates metadata from CrossRef, DOAJ, Unpaywall, institute-returned reports, and UKBsis snapshots, applying business rules to classify publications (DOIs) into **OA categories A–D**.
+It consolidates metadata from CrossRef, DOAJ, Unpaywall, Institute received reports, and UKBsis datahub snapshots, applying business rules to classify publications (DOIs) into **OA categories A–D**.
 
 ---
 
