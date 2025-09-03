@@ -1,7 +1,7 @@
 # UKBsis-2024-OA-Monitor-Project
 # OA Monitor Qlik Scripts
 
-This repository contains Qlik Sense ETL scripts used in the **UKB OA Monitor Project**.  
+This repository contains Qlik Sense ETL scripts used in the **2024 UKB OA Monitor Project**.  
 It consolidates metadata from CrossRef, DOAJ, Unpaywall, Institute received reports, and UKBsis datahub snapshots, applying business rules to classify publications (DOIs) into **OA categories A–D**.
 
 ---
@@ -58,9 +58,9 @@ Each script is modular:
 - **UKBsis QVD Snapshots** (Publisher report DOIs, Journals data)
 
 ## 📂 Datasets and Resources 
-https://zenodo.org/api/records/16962476/draft/files/Send%20Back%20Template%20OA%20monitor%20UKBsis.xlsx/content
-https://zenodo.org/api/records/16962476/draft/files/FLOW%20OA%20Monitor.png/content
-https://zenodo.org/api/records/16962476/draft/files/Initial%20Output%202024%20for%20OA%20analysis%20Template.csv/content
+All sets and subsets can be accessed in the link below: 
+
+https://zenodo.org/records/16962476?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6ImI4MmNkNTk5LTVjOGEtNDZjOS1hYjEwLWJiYjhhODNiMTViZiIsImRhdGEiOnt9LCJyYW5kb20iOiI0NTIzODRkYmFiY2JkNmY5MmM3YzdhNWI4Nzg0ZmUzNSJ9.BkbSNDVXUv9P9x6dl5GX22eLi8tn6OQa_-zSJCBiNdAXn_sRwNInfS9I3zfG5K5HdKeYT4ro2ge_miK-ZUwMkw
 
 ✍️ Maintained by UKBsis OA Monitor Project Team
 
