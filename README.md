@@ -6,19 +6,18 @@ It consolidates metadata from CrossRef, DOAJ, Unpaywall, Institute received repo
 
 ---
 
-## 🚀 Workflow
+🔄 Workflow Overview
 
-1. **Mapping** – ISSN.org mappings for ISSN to ISSN-L.  
-2. **Institutes Data** – Loads institutional identifiers and metadata.  
-3. **CrossRef** – CrossRef publication metadata (DOIs, ISSNs, dates).  
-4. **DOAJ** – Journal Open Access indicators.  
-5. **UPW (Unpaywall)** – Open access status at article level.  
-6. **Returned** – Adjustments from institutes.  
-7. **ReturnedSheet** – Pure isolated returned data for testing.  
-8. **UKBsis** – Datahub publisher reports as comparison.  
-9. **Final Model** – Consolidates all sources, applies rules, assigns final OA categories.  
-10. **Main_Call.qvs** – Executes all steps in correct order.
-
+Mapping – loads ISSN.org ISSN–ISSN-L mappings for journal-level checks.
+Institutes Data – loads DOIs and metadata returned by participating institutes.
+CrossRef – loads DOI metadata and ISSNs harvested from CrossRef.
+DOAJ – loads DOAJ journal metadata for OA checks.
+UPW (Unpaywall) – loads OA status, repository locations, and full-text availability.
+Returned – loads manual corrections and updates provided by institutes.
+ReturnedSheet – isolates returned results for independent testing by UKBsis.
+UKBsis – ingests DOIs from the UKBsis Publisher Report dataset.
+FinalModel – merges all sources and applies the business rules to assign OA categories (A–D).
+Main_Call – orchestrates execution of all subscripts in the correct order.
 ---
 
 ## 📂 Scripts
@@ -47,9 +46,6 @@ Each script is modular:
 - Institute-returned corrections can override (Step 2b).
 
 
-
-
-
 ---
 
 ## ⚙️ Data Sources
@@ -59,7 +55,7 @@ Each script is modular:
 - **DOAJ** (Directory of Open Access Journals)  
 - **Unpaywall** (OA status per DOI)  
 - **Institute Reports** (Excel corrections returned by institutions)  
-- **UKBsis QVD Snapshots** (Publisher report DOIs, journal facts)
+- **UKBsis QVD Snapshots** (Publisher report DOIs, Journals data)
 
 ## 📂 Datasets and Resources 
 https://zenodo.org/api/records/16962476/draft/files/Send%20Back%20Template%20OA%20monitor%20UKBsis.xlsx/content
