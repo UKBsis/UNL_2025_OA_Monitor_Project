@@ -8,16 +8,16 @@ It consolidates metadata from CrossRef, DOAJ, Unpaywall, Institute received repo
 
 🔄 Workflow Overview
 
-Mapping – loads ISSN.org ISSN–ISSN-L mappings for journal-level checks.
-Institutes Data – loads DOIs and metadata returned by participating institutes.
-CrossRef – loads DOI metadata and ISSNs harvested from CrossRef.
-DOAJ – loads DOAJ journal metadata for OA checks.
-UPW (Unpaywall) – loads OA status, repository locations, and full-text availability.
-Returned – loads manual corrections and updates provided by institutes.
-ReturnedSheet – isolates returned results for independent testing by UKBsis.
-UKBsis – ingests DOIs from the UKBsis Publisher Report dataset.
-FinalModel – merges all sources and applies the business rules to assign OA categories (A–D).
-Main_Call – orchestrates execution of all subscripts in the correct order.
+- Mapping – loads ISSN.org ISSN–ISSN-L mappings for journal-level checks.
+- Institutes Data – loads DOIs and metadata returned by participating institutes.
+- CrossRef – loads DOI metadata and ISSNs harvested from CrossRef.
+- DOAJ – loads DOAJ journal metadata for OA checks.
+- UPW (Unpaywall) – loads OA status, repository locations, and full-text availability.
+- Returned – loads manual corrections and updates provided by institutes.
+- ReturnedSheet – isolates returned results for independent testing by UKBsis.
+- UKBsis – ingests DOIs from the UKBsis Publisher Report dataset.
+- FinalModel – merges all sources and applies the business rules to assign OA categories (A–D).
+- Main_Call – orchestrates execution of all subscripts in the correct order.
 ---
 
 ## 📂 Scripts
@@ -43,7 +43,7 @@ Each script is modular:
 - **B** → Gold/Hybrid verified by UKBsis Publisher Reports  
 - **C** → Green (repository copy)  
 - **D** → Bronze/Closed  
-- Institute-returned corrections can override (Step 2b).
+- Institute-returned corrections can override (Step 2b and later).
 
 
 ---
