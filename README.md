@@ -60,7 +60,7 @@ Each script is modular:
 ## 📂 Datasets and Resources 
 All sets and subsets can be accessed in the link below: 
 
-Link will be available in October 2025
+(https://zenodo.org/records/17284801?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6ImFjNDhmMDcyLWVmMWQtNDQ5MC04ZDc1LTA2NDM4Zjk5MmU2NSIsImRhdGEiOnt9LCJyYW5kb20iOiJjY2I0ODU3YWI3OTM2OTBkMDM1YjM4YWMzZmNhOGEwZSJ9.akMNaWmfRN_3Kx61rABvPhGQP8xpF-eYZf_Sbt2fJMjVqXl3nOCcMXrIphAL3FP65h48ai5RjlRcIXdr05Jp5g)
 
 ✍️ Maintained by UKBsis OA Monitor Project Team
 
