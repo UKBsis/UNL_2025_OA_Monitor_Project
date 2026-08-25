@@ -1,21 +1,19 @@
-# UKBsis-2024-OA-Monitor-Project
+# SURF_2025_OA_Monitor_Project
 # OA Monitor Qlik Scripts
 
-This repository contains Qlik Sense ETL scripts used in the **2024 UKB OA Monitor Project**.  
-It consolidates metadata from CrossRef, DOAJ, Unpaywall, Institute received reports, and UKBsis datahub snapshots, applying business rules to classify publications (DOIs) into **OA categories A–D**.
+This repository contains Qlik Sense ETL scripts used in the **2025 SURF OA Monitor Project**.  
+It consolidates metadata from CrossRef, DOAJ, Unpaywall, Institute received reports, and SURF  Metadata Hub snapshots, applying business rules to classify publications (DOIs) into **OA categories A–D**.
 
 ---
 
 🔄 Workflow Overview
 
 - Mapping – loads ISSN.org ISSN–ISSN-L mappings for journal-level checks.
-- Institutes Data – loads DOIs and metadata returned by participating institutes.
+- Institutes Data (CRIS) – loads DOIs and metadata returned by participating institutes.
 - CrossRef – loads DOI metadata and ISSNs harvested from CrossRef.
 - DOAJ – loads DOAJ journal metadata for OA checks.
-- UPW (Unpaywall) – loads OA status, repository locations, and full-text availability.
-- Returned – loads manual corrections and updates provided by institutes.
-- ReturnedSheet – isolates returned results for independent testing by UKBsis.
-- UKBsis – ingests DOIs from the UKBsis Publisher Report dataset.
+- UPW (Unpaywall) – loads OA status, repository locations.
+- SURF – ingests DOIs from the SURF Publisher Report dataset.
 - FinalModel – merges all sources and applies the business rules to assign OA categories (A–D).
 - Main_Call – orchestrates execution of all subscripts in the correct order.
 ---
@@ -28,11 +26,9 @@ Each script is modular:
 - `02_InstitutesData.qvs` → Institutional identifiers  
 - `03_CrossRef.qvs` → CrossRef metadata  
 - `04_DOAJ.qvs` → DOAJ metadata  
-- `05_UPW.qvs` → Unpaywall metadata  
-- `06_Returned.qvs` → Institute feedback  
-- `07_ReturnedSheet.qvs` → Isolated returned data  
-- `08_UKBsis.qvs` → UKBsis snapshot data  
-- `09_FinalModel.qvs` → Final OA classification  
+- `05_UPW.qvs` → Unpaywall metadata   
+- `06_SURF.qvs` → SURF snapshot data  
+- `07_FinalModel.qvs` → Final OA classification  
 - `Main_Call.qvs` → Orchestration
 
 ---
@@ -40,10 +36,11 @@ Each script is modular:
 ## 📊 Business Rules
 
 - **A** → Gold (ISSN in DOAJ via CrossRef)  
-- **B** → Gold/Hybrid verified by UKBsis Publisher Reports  
-- **C** → Green (repository copy)  
-- **D** → Bronze/Closed  
-- Institute-returned corrections can override (Step 2b and later).
+- **B** → Gold/Hybrid verified by SURF Publisher Reports  
+- **C** → Green (repository copy URL provided)  
+- **D** → Bronze/Closed
+- **No Cat** → DOI not found in DOAJ / UPW / CrossRef / SURF PR
+
 
 
 ---
@@ -51,16 +48,16 @@ Each script is modular:
 ## ⚙️ Data Sources
 
 - **ISSN.org** (ISSN to ISSN-L mappings)  
-- **CrossRef** (DOI metadata)  
+- **CrossRef** (DOI & ISSN metadata)  
 - **DOAJ** (Directory of Open Access Journals)  
-- **Unpaywall** (OA status per DOI)  
-- **Institute Reports** (Excel corrections returned by institutions)  
-- **UKBsis QVD Snapshots** (Publisher report DOIs, Journals data)
+- **Unpaywall** (OA status, URLs per DOI)  
+- **Institute Reports** (CSV reports by institutions)  
+- **SURF Metadata QVD Snapshots** (Publisher report DOIs, Journals data)
 
 ## 📂 Datasets and Resources 
 All sets and subsets can be accessed in the link below: 
 
 https://doi.org/10.5281/zenodo.17358443
 
-✍️ Maintained by UKBsis OA Monitor Project Team
+✍️ Maintained by SURF OA Monitor Project Team
 
