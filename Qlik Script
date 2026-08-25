@@ -1,133 +1,100 @@
-Sub Mapping
-
-// ISSN.org query available upon request, a set extracted on 2025-06-10 and used as below
+ Sub Mapping
+// ISSN.org query available upon request, a set dowloaded on 2026-04-21 and used as below
 
 ISSN:
 LOAD
     ISSN,
     "ISSN-L"
-FROM [lib://UKBsis_XLS/1.4  JOURNALS/1.4.3  ISSN_ORG/20250610.ISSN-to-ISSN-L.txt]
+FROM [lib://UKBsis_XLS/1.4  JOURNALS/1.4.3  ISSN_ORG/20260421.ISSN-to-ISSN-L.txt]
 (txt, codepage is 28591, embedded labels, delimiter is '\t', msq);
 
 ISSN_Map:
 Mapping Load
     ISSN,
     "ISSN-L"
-FROM [lib://UKBsis_XLS/1.4  JOURNALS/1.4.3  ISSN_ORG/20250610.ISSN-to-ISSN-L.txt]
-(txt, codepage is 28591, embedded labels, delimiter is '\t', msq);
+Resident ISSN;
 
 End Sub
 
 Sub CRIS
 
-// Below received sets of DOIs and metadata received as per template (link to Zenodo resource will be pasted here.xlsx)
+// Below received sets of DOIs and metadata received as per template
 // provided from participating institutes
 
 Cris_Final:
-Load
-1 as X AutoGenerate (1);
+LOAD 1 AS X AUTOGENERATE 0;
 
-//load all csv files received (';' delimited)
-For each csvFile in filelist ('lib://UKBsis_XLS/1.2024 OA Monitor Project 2024/* 2024 *.csv')
+FOR EACH csvFile IN FileList('lib://UKBsis_XLS/1.2025 OA Monitor Project 2025/*2025*.csv')
 
-Concatenate(Cris_Final)
-Load *,
-If(match("Reporting institution (human readable) temp", 'eut' ),'tue' ,
- If(match("Reporting institution (human readable) temp", 'tiu') , 'uvt',
-  If(match("Reporting institution (human readable) temp", 'lei') , 'ul',
-   If(match("Reporting institution (human readable) temp", 'ug') , 'rug',
+    TRACE Processing $(csvFile);
 
-"Reporting institution (human readable) temp")))) as "Reporting institution (human readable)"
+    // Try comma
+    Temp:
+    LOAD *
+    FROM [$(csvFile)]
+    (txt, utf8, embedded labels, delimiter is ',', msq);
+
+    IF NoOfFields('Temp') = 1 THEN
+
+        DROP TABLE Temp;
+
+    // Retry semicolon
+        Temp:
+        LOAD *
+        FROM [$(csvFile)]
+        (txt, utf8, embedded labels, delimiter is ';', msq);
+
+    ENDIF
+
+    CONCATENATE (Cris_Final)
+    LOAD *
+    ,'$(csvFile)' as FileName
+    RESIDENT Temp;
+
+    DROP TABLE Temp;
+
+NEXT csvFile;
+
+Cris_Final_Transformed:
+LOAD
+*,
+ "Reporting institution (human readable)" & '_' &  trim(Upper(DOI))  as Identifier_Link,
+ "Reporting institution (human readable)" &'_'& Upper(DOI) as Return_Link;
+LOAD
+*,
+ If(match("Reporting institution (human readable) temp", 'eut' ),'tue' ,
+  If(match("Reporting institution (human readable) temp", 'tiu') , 'uvt',
+   If(match("Reporting institution (human readable) temp", 'lei') , 'ul',
+    If(match("Reporting institution (human readable) temp", 'ug') , 'rug',
+      If(match("Reporting institution (human readable) temp", 'umcu') , 'uu',
+"Reporting institution (human readable) temp"))))) as "Reporting institution (human readable)"
+
 ;
 load
     "Institutional identifier",
     "Reporting institution  (ROR)",
-    "Reporting institution (human readable)" & '_' &  trim(Upper(DOI))  as Return_Link,
-    "Reporting institution (human readable)" as "Reporting institution (human readable) temp", 
+    trim("Reporting institution (human readable)") as "Reporting institution (human readable) temp", 
     null() as ISSN_CRIS,
     DOI,
-    if(isnull(DOI) or len(DOI)<1, 'No DOI from instititute',
+    if(isnull(DOI) or len(DOI)<1, null(),
      trim(Upper(DOI))
     ) AS doi,               //doi_cleaned
-   '' as "OA category according to institute (manual)",
-   '' as "Updated URL by institute (manual)",
-     '$(csvFile)' as FileName,
-     2024 as "Publication Year"
-FROM [$(csvFile)]
-(txt, utf8, embedded labels, delimiter is ';', msq);
+    "OA category according to institute",
+    "OA category according to institute" as "C Reported",
+    "URL by institute",
+    FileName,
+    2025 as "Publication Year"
+RESIDENT Cris_Final;
+
+DROP TABLE Cris_Final;
+RENAME TABLE Cris_Final_Transformed TO Cris_Final;
 
 
-next csvFile;
-
-
-// Load all csv files received (',' delimited)
-For each cFile in filelist ('lib://UKBsis_XLS/1.2024 OA Monitor Project 2024/*-2024-*.csv')
-
-Concatenate(Cris_Final)
-Load *,
-If(match("Reporting institution (human readable) temp", 'eut' ),'tue' ,
- If(match("Reporting institution (human readable) temp", 'tiu') , 'uvt',
-  If(match("Reporting institution (human readable) temp", 'lei') , 'ul',
-   If(match("Reporting institution (human readable) temp", 'ug') , 'rug',
-
-"Reporting institution (human readable) temp")))) as "Reporting institution (human readable)"
-;
-load  
-    "Institutional identifier",
-    "Reporting institution  (ROR)",
-    "Reporting institution (human readable)" & '_' &  trim(Upper(DOI))  as Return_Link,
-    "Reporting institution (human readable)" as "Reporting institution (human readable) temp", //org_name
-    null() as ISSN_CRIS,
-    DOI,
-    if(isnull(DOI) or len(DOI)<1, 'No DOI from instititute',
-     trim(Upper(DOI))
-    ) AS doi,               //doi_cleaned
-   '' as "OA category according to institute (manual)",
-   '' as "Updated URL by institute (manual)",
-     '$(cFile)' as FileName,
-     2024 as "Publication Year"
-FROM [$(cFile)]
-(txt, utf8, embedded labels, delimiter is ',', msq);
-
-next cFile;
-
-drop fields [X],"Reporting institution (human readable) temp";
-
-
-Institutional_Identifyer:
+Institutional_Identifier:
 Load
 "Reporting institution (human readable)"
 ,"Institutional identifier" as "Institutional identifier unconcat"
  Resident Cris_Final;
-
-
-Left join(Cris_Final)
-LOAD
-doi,
-concat (DISTINCT "Institutional identifier", ' , ') as Institutional_identifier_concat
-Resident Cris_Final
-Group by doi
-;
-
-left join(Cris_Final)
-LOAD
-Return_Link,
-concat (DISTINCT "Institutional identifier", ' , ') as Institutional_identifier_concat_inst
-Resident Cris_Final
-Group by Return_Link
-;
-
-Left join(Cris_Final)
-LOAD
-doi,
-concat (DISTINCT "Reporting institution (human readable)", ' , ') as org_name_concat,
-concat (DISTINCT "Reporting institution  (ROR)", ' , ')  as ROR_concat
-Resident Cris_Final
-Group by doi
-;
-
-// Below the combined list of DOIs received is listed and written to a csv file, 
-// which gets used in the Python queries to the various open sources
 
 Python_Output_temp:
 Load distinct
@@ -143,26 +110,61 @@ Search_DOI_temp as  Search_DOI
 Resident Python_Output_temp;
 Drop Table Python_Output_temp;
 
-// Below Store statement writes the Search Output list that Python Scripts 
-// will pick up on Surf Drive to query Open Sources ISSN.org CrossRef & Unpaywall.org
+Left join(Cris_Final)
+LOAD
+doi,
+concat (DISTINCT "Institutional identifier", ' , ') as Institutional_identifier_concat
+Resident Cris_Final
+Group by doi
+;
 
+Left join(Cris_Final)
+LOAD
+Identifier_Link,
+concat (DISTINCT "Institutional identifier", ' , ') as Institutional_identifier_concat_inst
+Resident Cris_Final
+Group by Identifier_Link
+;
 
-//Store Python_Output into [lib://UKBsis_XLS/1.15 UNPAYWALL HARVEST/1.15.1 META/PR_SCOPUS_NHT_OAS_OPENAIRE_DOI.csv](txt,delimiter is ';');
+Left join(Cris_Final)
+LOAD
+doi,
+concat (DISTINCT "Reporting institution (human readable)", ' , ') as org_name_concat,
+concat ("OA category according to institute", ' , ') as "OA category according to institute_concat", //Front end label: "OA category according to institutes"
+concat (DISTINCT "Reporting institution  (ROR)", ' , ')  as ROR_concat
+Resident Cris_Final
+Group by doi
+;
+
+DOI_COUNT:
+LOAD
+    doi,
+    Count(doi) as doi_Count,
+    Count(distinct "Reporting institution (human readable)") as institute_Count
+Resident Cris_Final
+Group By doi;
+
+Left Join(Cris_Final)
+Load
+doi
+,doi_Count
+,institute_Count
+Resident DOI_COUNT;
+Drop Table DOI_COUNT;
+
+// Store Python_Output into [lib://UKBsis_XLS/1.15 UNPAYWALL HARVEST/1.15.1 META/PR_SCOPUS_NHT_OAS_OPENAIRE_DOI.csv] (txt,delimiter is ';');
 
 End Sub
 
 Sub CrossRef
-// Pyhton Query to Crossref will be available upon request 
-// Below set queried on 2025-06-11 is used
 
 CrossRef_Temp:
 Load distinct
 doi
 Resident Cris_Final;
 
-
-
 Left Join(CrossRef_Temp)
+
 LOAD distinct
     _UPW_PRE_Key,
     Search_DOI as CR_Search_DOI ,
@@ -171,6 +173,7 @@ LOAD distinct
     Upper(doi) as CrossRef_doi,
     title,
     "published-print",
+    //"published-online",
     date(created,'YYYY-MM-DD') as cr_created_date,
     Year(created) as cr_created_year,
     issued,
@@ -181,8 +184,9 @@ LOAD distinct
     [issn-type]
     ,trim(PurgeChar(subfield(subfield(subfield([issn-type],'value',2),': ',2),',',1),',{,},'']')) as cr_ISSN
     ,trim(PurgeChar(subfield(subfield([issn-type],'type',2),',',1),',{,},'']:')) as cr_ISSN_Type
-FROM [lib://UKBsis_XLS/1.18 CROSSREF HARVEST/Output/CROSSREF_DOI_2025-06-11.csv] 
-(txt, utf8, embedded labels, delimiter is '$', msq);
+FROM [lib://UKBsis_XLS/1.18 CROSSREF HARVEST/Output/CROSSREF_DOI_2026-08-06.csv] 
+(txt, utf8, embedded labels, delimiter is '$', msq)
+Where len(doi) >1;
 
 left Join(CrossRef_Temp)
 Load distinct
@@ -196,9 +200,10 @@ LOAD
     Upper(doi) as doi,
     "content-version",
     "URL"
-FROM [lib://UKBsis_XLS/1.18 CROSSREF HARVEST/Output/CROSSREF_LICENSE_2025-06-11.csv] 
-(txt, codepage is 28591, embedded labels, delimiter is '$', msq);
-
+FROM [lib://UKBsis_XLS/1.18 CROSSREF HARVEST/Output/CROSSREF_LICENSE_2026-08-06.csv] 
+(txt, codepage is 28591, embedded labels, delimiter is '$', msq)
+Where len(doi) >1
+;
 
 left join (CrossRef_Temp)
 Load
@@ -226,16 +231,14 @@ Load
 ,if(not isnull( CrossRef_doi), 'true','false') as cr_included
 Resident CrossRef_Temp;
 
-
-
 Drop Table CrossRef_Temp;
 End Sub
 
 Sub DOAJ
 
 /*
-DOAJ dump used from 25/06/2025 download
-to fill in all 2024 Journals not yet appearing in DOAJ in 2024
+DOAJ dump used from 2026 download
+to fill in all 2025 Journals not yet appearing in DOAJ in 2025
 DOAJ process for capturing from DOAJ website : https://doaj.org/docs/public-data-dump/
 
 Documentatie Journal List: DOAJ
@@ -283,18 +286,16 @@ Load
       ,"Journal ISSN (print version)") as ISSN_L_Unmapped,
       APC
 FROM [lib://UKBsis_XLS/1.4  JOURNALS/1.4.6 DOAJ Dump/DOAJ 2018 to Current.xlsx]
-(ooxml, embedded labels, table is [2025])
-where [When did the journal start to publish all content using an open license?]<=2024
+(ooxml, embedded labels, table is [2026])
+where [When did the journal start to publish all content using an open license?]<=2026
 ;
 
-
 End Sub
-
 
 Sub UPW
 // Pyhton Query to unpaywall.org will be available upon request
 // The sets of DOIs received from all participating institutes are combined as a base for this query and
-// a CSV Dataset is obtained from Python Query to unpaywall.org datestamp 2025-06-11
+// a CSV Dataset is obtained from Python Query to unpaywall.org datestamp 21-07-2026
 UPW_DOI:
 
 
@@ -327,11 +328,12 @@ LOAD
     license,
     oa_date,
     best_oa_url_for_pdf
-FROM [lib://UKBsis_XLS/1.15 UNPAYWALL HARVEST/1.15.2 OUTPUT DC/UNPAYWALL_DOI_2025-06-11.csv]
-(txt, utf8, embedded labels, delimiter is '$', msq);
+FROM [lib://UKBsis_XLS/1.15 UNPAYWALL HARVEST/1.15.2 OUTPUT DC/UNPAYWALL_DOI_2026-08-06.csv]
+(txt, utf8, embedded labels, delimiter is '$', msq)
+Where len(doi) >1
+;
 
 Unqualify *;
-
 
 UPW_Locations:
 Qualify *;
@@ -352,9 +354,9 @@ LOAD
     endpoint_id,
     repository_institution,
     oa_date as LOC_oadate
-FROM [lib://UKBsis_XLS/1.15 UNPAYWALL HARVEST/1.15.2 OUTPUT DC/UNPAYWALL_OA_LOCATIONS_2025-06-11.csv]
+FROM [lib://UKBsis_XLS/1.15 UNPAYWALL HARVEST/1.15.2 OUTPUT DC/UNPAYWALL_OA_LOCATIONS_2026-08-06.csv]
 (txt, codepage is 28591, embedded labels, delimiter is '$', msq)
-
+Where len(doi) >1
 ;
 
 Unqualify * ;
@@ -366,9 +368,9 @@ doi,
 concat (DISTINCT UPW_Locations.version, ' , ') as version_concat,
 concat (DISTINCT UPW_Locations.repository_institution, ' , ') as repository_institution_concat,
 concat (DISTINCT UPW_Locations.host_type, ' , ') as host_type_concat,
-concat (DISTINCT UPW_Locations.url_for_pdf, ' , ')  as url_for_pdf,
-concat (DISTINCT UPW_Locations.url_for_landing_page, ' , ') as url_for_landing_page_concat
-
+concat (DISTINCT UPW_Locations.url_for_pdf, ' , ')  as url_for_pdf_concat,
+concat (DISTINCT UPW_Locations.url_for_landing_page, ' , ') as url_for_landing_page_temp,
+concat (DISTINCT UPW_DOI.best_oa_url_for_pdf, ' , ') as best_oa_url_for_pdf_concat
 
 Resident UPW_DOI
 Group by doi
@@ -383,95 +385,26 @@ Resident UPW_DOI
 Group by doi
 ;
 
-
 Left join(UPW_DOI)
 LOAD
 doi,
-UPW_Locations.url_for_landing_page as url_for_landing_page_temp
+url_for_landing_page_temp as url_for_landing_page_concat
 Resident UPW_DOI
 where match(UPW_Locations.is_best,'True')
 ;
 
 End Sub
 
-Sub ReturnedSheet
+Sub SURF
 
-// Below is a pure returned result isolated from the rest of the data model
-// so that testing and comparisons can be conducted by UKBsis
-
-Returned_Sheet:
-Load
-1 as X AutoGenerate (1);
-
-For each returnedxlsxFile in filelist ('lib://UKBsis_XLS/1.2024 OA Monitor Project 2024/Institutes - Returned with corrections/*.xlsx')
-    Concatenate (Returned_Sheet)
-    Returned_Sheet:
-    LOAD distinct
-    *
-    FROM [$(returnedxlsxFile)]
-    (ooxml, embedded labels, header is 1 lines, table is Sheet1);
-next returnedxlsxFile;
-
-drop field [X];
-
-Returned_BY_Inst:
-Qualify *;
-NoConcatenate
-Load
-*
-Resident Returned_Sheet;
-Unqualify *;
-
-Drop Table Returned_Sheet;
-
-End Sub
-
-sub ReturnedSheet
-
-// Below is a pure returned result isolated from the rest of the rest of the data model so that testing and comparisons 
-// can be conducted by UKBsis
-
-Returned_Sheet:
-Load
-1 as X AutoGenerate (1);
-For each returnedxlsxFile in filelist ('lib://UKBsis_XLS/1.2024 OA Monitor Project 2024/Institutes - Returned with corrections/*.xlsx')
-Concatenate (Returned_Sheet)
-
-
-Returned_Sheet:
-LOAD distinct
-*
-FROM [$(returnedxlsxFile)]
-(ooxml, embedded labels, header is 1 lines, table is Sheet1);
-
-
-next returnedxlsxFile;
-
-drop field [X];
-
-Returned_BY_Inst:
-Qualify *;
-NoConcatenate
-Load
-*
-Resident Returned_Sheet;
-Unqualify *;
-
-Drop Table Returned_Sheet;
-
-EndSub
-
-Sub UKBsis
-
-// Below is the addition of the UKBsis Publisher Report DOIs and metadata to the datamodel 
+// Below is the addition of the SURF Metadata Hub Publisher Report DOIs and metadata to the datamodel 
 // to be taken into consideration in the Final Business rule for Category classification
 
-Set vTimeStamp = '30-07-2025'; //  date /timestamp for our use of UKB as a "data source"
-Set vPathQVD   = 'lib://UKBSIS_QVD/2.20 Monitoring/Snapshot/New/OA Monitor Snapshots';
+Set vTimeStamp = '21-07-2026'; // timestamp for our use of SURF Metadat Hub as a "data source"
+Set vPathQVD   = 'lib://UKBSIS_QVD/2.20 Monitoring/Snapshot/OA UNL Monitor 2026';
 
-
-//  UKBsis Datahub OA Status as comparison for final OA status
-UKBsis:
+//  SURF Metadata Hub OA Status as comparison for final OA status
+SURF:
 Qualify * ;
 Unqualify doi;
 Load Distinct
@@ -489,48 +422,46 @@ Where
     AND [Article PR_OAS_SOURCE]<>'OAS'
     ;
 Unqualify *;    
-// To Create a link between DOI and Journal use the FACTS table from UKBsis
+// To Create a link between DOI and Journal use the FACTS table from SURF
 FACTS:
-Left Join (UKBsis)
+Left Join (SURF)
 LOAD Distinct
- Upper(DOI) as doi
-,Journals_ID       as UKB_Journals_ID
+Upper(DOI)         as doi
+,Journals_ID       as SURF_Journals_ID
 From
 [$(vPathQVD)/FACTS_$(vTimeStamp).qvd] (qvd);
 
 // For the distinction between Cat A or B for gold status, determine if we have found the ISSN in DOAJ
-// which will mean a Category A awarded
-
-UKB_DOAJ:
-Left Join (UKBsis)
+SURF_DOAJ:
+Left Join (SURF)
 LOAD Distinct
-  Journals_ID       as UKB_Journals_ID               
-  ,"Journal Source" as UKB_Journals_Source
+    Journals_ID       as SURF_Journals_ID               
+  ,[Journal Source]   as SURF_Journals_Source
 From
 [$(vPathQVD)/#Journals_$(vTimeStamp).qvd] (qvd)
-where match("Journal Source",'DOAJ')
+where match([Journal Source],'DOAJ')
 ;
 
-UKBsis_Final:
+
+SURF_Final:
 NoConcatenate
 Load distinct
- doi
- ,UKBsis.DOI
- ,[UKBsis.BR_OA_Status_temp]
- ,if(match([UKBsis.BR_OA_Status_temp],'Gold open access','Hybrid open access'), 'B'
-  ) as [Step 2a UKBsis.BR_OA_Status]
- ,UKB_Journals_Source
- ,"UKBsis.UPW DOI url"
-Resident UKBsis;
+  doi
+ ,SURF.DOI
+ ,[SURF.BR_OA_Status_temp]
+ ,if(match([SURF.BR_OA_Status_temp],'Gold open access','Hybrid open access'), 'B' 
+    ,[SURF.BR_OA_Status_temp]) as [Step 2a SURF.BR_OA_Status]
+ ,SURF_Journals_Source
+ ,[SURF.UPW DOI url]
+Resident SURF;
 
-Drop Table UKBsis;
-
+Drop Table SURF;
 End Sub
 
-Sub FinalModel
+Sub FinalModelNew
 
-// Finally all results from DOAJ, Unpaywall and adjusted results received from Institutes (including UKBsis datahub) 
-// gets combined and teh final business rule applied to get a final category result (A - D) per DOI
+// Finally all results from DOAJ, Unpaywall and adjusted results received from Institutes (including SURF Metadata Hub) 
+// gets combined and the final business rule applied to get a final category result (A - D) per DOI
 
 Final_Temp:
 Load distinct
@@ -549,13 +480,6 @@ Resident Cris_Final
 
 
 Left Join(Final_Temp)
-Load distinct
-  doi
-  ,ISSN_L_returned
-Resident Returned_ISSN;
-Drop Table Returned_ISSN;
-
-Left Join(Final_Temp)
 Load
  Upper(doi) as doi
  ,cr_included as cr_included_Final
@@ -563,15 +487,8 @@ Load
  ,cr_created_date as cr_created_date_Final
  ,cr_issued_year as cr_issued_year_Final
  ,ISSN_L as ISSN_L_Final
- //,ISSN_L as ISSN_L_Final_CR   //ISSN Future way
 Resident CrossRef;
 
-// //ISSN Future way (Not in use for 2024 project)
-// Left Join(Final_Temp)
-// Load Distinct
-// doi
-// ,if(isnull(ISSN_L_returned),ISSN_L_Final_CR,ISSN_L_returned) as ISSN_L_Final
-// Resident Final_Temp;
 
 Left Join(Final_Temp)
 Load distinct
@@ -583,16 +500,21 @@ where len(ISSN_L) > 2;
 
 Left Join(Final_Temp)
 Load
- Upper(doi) as doi
- ,if(isnull(url_for_landing_page_temp), UPW_Locations.url_for_landing_page
- ,url_for_landing_page_temp)                as url_for_landing_page
- ,if(lower("UPW_DOI.has_repository_copy")   = 'true'
-  And lower(UPW_DOI.oa_status_temp)         = 'bronze','green'
- ,lower(UPW_DOI.oa_status_temp))            as UPW_DOI.oa_status_Final
+ Upper(doi) as doi,
+ 
+if(len(trim(url_for_landing_page_concat)) > 0,
+    url_for_landing_page_concat,
+    if(len(trim(best_oa_url_for_pdf_concat)) > 0,
+        best_oa_url_for_pdf_concat,
+        url_for_pdf_concat
+    )
+)                                           as url_for_landing_page
+
+ ,lower(UPW_DOI.oa_status_temp)             as UPW_DOI.oa_status_Final
  ,UPW_DOI.UPW_doi                           as UPW_doi_Final
  ,repository_institution_concat             as repository_institution_Final
  ,host_type_concat  						as host_type_Final
- ,url_for_pdf 								as url_for_pdf_Final
+ ,url_for_pdf_concat 					    as url_for_pdf_Final
 Resident UPW_DOI;
 
 Final_Temp2:
@@ -601,59 +523,50 @@ Load distinct
 *
  ,if(not isnull(DOAJ_ISSN_Final), 'true','false') as DOAJ_included 
  ,if(not isnull(UPW_doi_Final), 'true','false') as UPW_included 
+ //Step 1 Business Rule:
  ,if(ISSN_L_Final = DOAJ_ISSN_Final, 'A' 
- ,if(match([UPW_DOI.oa_status_Final],'gold','hybrid'), 'B'
+ ,if(match([UPW_DOI.oa_status_Final],'gold','hybrid'), 'B' 
  ,if(match(UPW_DOI.oa_status_Final,'green'), 'C'
  ,if(match(UPW_DOI.oa_status_Final, 'bronze','closed'), 'D'
  ,url_for_landing_page
- ))))
- as "Step 1 OA Category BR (automated)"
- 
+ ))))  as "Step 1 OA Category BR (automated)"  // Front end field label : "OA category (automated)"
+ ,if(match([UPW_DOI.oa_status_Final],'gold','hybrid'), 'B' 
+ ,if(match(UPW_DOI.oa_status_Final,'green'), 'C'
+ ,if(match(UPW_DOI.oa_status_Final, 'bronze','closed'), 'D'
+ ))) as "UPW Category Result"
 Resident Final_Temp;
 Drop table Final_Temp;
 
-// only compare the OA Monitor project DOIs with the UKBsis Unpaywall URLs
+// only compare the OA Monitor project DOIs with the SURF Unpaywall URLs
 left Join (Final_Temp2)
 Load Distinct
  doi,
- UKBsis.DOI,
- "Step 2a UKBsis.BR_OA_Status",
- UKB_Journals_Source,
- "UKBsis.UPW DOI url"
-Resident UKBsis_Final;
+ SURF.DOI,
+ [Step 2a SURF.BR_OA_Status], //Front end field label : "Metadatahub PR Score"
+ SURF_Journals_Source,
+ [SURF.UPW DOI url]
+Resident SURF_Final;
 
-//Returned Results from Institutes
+//Returned "C" Results from Institutes
 left Join(Final_Temp2)
 Load Distinct
-Returned.Return_Link as Return_Link
-,SubField(Returned.Return_Link,'_',1) as Returned_by_institute
-,"Returned.Step 2b OA category according to institute (manual)" as "Step 2b OA category according to institute_temp" 
-,"Returned.Updated URL by institute (manual)" as "Step 2b Updated URL by institute (manual)"
-
-Resident Returned
-;
-
-//Returned URLs concatenated received from Institutes
-left Join(Final_Temp2)
-Load Distinct
-doi
-,Concat(distinct "Returned.Updated URL by institute (manual)",' | ') as "Concat Step 2b Updated URL by institute (manual)"
-Resident Returned
-Group By doi
-; 
+ Return_Link
+,SubField(Return_Link,'_',1) as Returned_by_institute
+,if(len("OA category according to institute")<1, null(), "OA category according to institute") as "Step 2b OA category according to institute"
+,"URL by institute" as "Step 2b Updated URL by institute (manual)"
+Resident Cris_Final;
 
 
-left Join(Final_Temp2)
-Load Distinct
-Return_Link
-,if(isnull("Step 2b OA category according to institute_temp"),
-   "Step 1 OA Category BR (automated)","Step 2b OA category according to institute_temp") 
-   as "Step 2b OA category according to institute"
- 
-Resident Final_Temp2;
- 
- 
-Drop Table UKBsis_Final;
+
+SURF_Result:
+Qualify *;
+Unqualify doi;
+left join (Final_Temp2)
+Load *
+Resident SURF_Final;
+Unqualify * ;
+
+Drop Table SURF_Final;
 
 CategoryRankMap:
 MAPPING LOAD * INLINE [
@@ -669,7 +582,7 @@ NoConcatenate
 Load
 *,
  ApplyMap('CategoryRankMap', "Step 1 OA Category BR (automated)",999) as "Step 1 Rank",
- ApplyMap('CategoryRankMap', "Step 2a UKBsis.BR_OA_Status",999) as "Step 2a Rank",
+ ApplyMap('CategoryRankMap', "Step 2a SURF.BR_OA_Status",999) as "Step 2a Rank",
  ApplyMap('CategoryRankMap', "Step 2b OA category according to institute",999) as "Step 2b Rank"
 
 Resident Final_Temp2;
@@ -682,10 +595,13 @@ Left Join (Final)
 
 LOAD distinct
     doi,
-    sum([Step 2a Rank]) as SumRank2a,  //UKB
-    sum([Step 2b Rank]) as SumRank2b,  //Institute
+    sum([Step 2a Rank]) as SumRank2a,  // SURF
+    sum([Step 2b Rank]) as SumRank2b,  // Institute
     sum([Step 1 Rank]) as SumRank1,    // Initial Auto Business Rule
+    FirstSortedValue(Distinct "Step 1 OA Category BR (automated)", [Step 1 Rank]) as Sorted1Category,
+    FirstSortedValue(Distinct "Step 2a SURF.BR_OA_Status", [Step 2a Rank]) as Sorted2aCategory,
     FirstSortedValue(Distinct "Step 2b OA category according to institute", [Step 2b Rank]) as Sorted2bCategory
+
 RESIDENT Final
 GROUP BY doi
 ;
@@ -695,57 +611,115 @@ GROUP BY doi
 // Award Category A for only for DOIs that have an A in "Step 1 OA Category BR (automated)" 
 // as these DOIs' ISSNs were found in DOAJ (ISSNs harvested from CrossRef and sent through the mapping of ISSN.org).
 
-// Next if the DOI has not been found in DOAJ, but found in the set of UKBsis Datahub 
-// (only taking into consideration the UKBsis DOIs that were reported by the Publishers directly)
-// a B is awarded as these were checked by UKBsis
+// Next if the DOI has not been found in DOAJ, but found in the set of SURF Metadata Hub with Gold or Hybrid OA Status
+// (only taking into consideration the SURF DOIs that were reported by the Publishers directly)
+// a B is awarded as these were checked by SURF
 
-// If none of the above criteria were met, the DOI's Category awarded by the institutes themselves are taken 
-// into consideration should there be URL evidence provided (the highest rank i.e B over C if reported by more than
-// one institution. A's can only be awarded here if there were no ISSNs found within Crossref and there is 
-// therefore no search possible within DOAJ
+// If none of the above criteria were met, the DOI's Category awarded by the institutes themselves (C) are taken 
+// into consideration should there be URL evidence provided. 
 
-
+// PR OA status or DOAJ A/B> Unpaywall A / B > Institute C > Unpaywall C / D
+// So, if an institute scores the DOI a C but DOAJ, PR OA or unpaywall states it's an A or B, 
+// than the institutional info should be overwritten. 
+// In the dashboard you should see the final merged score (based on DOAJ, PR OA or Unpaywall) including the link to the publication if the initial automated score was overwritten
 
 LEFT JOIN (Final)
 LOAD distinct
 doi,
-if(match("Step 1 OA Category BR (automated)",'A'), "Step 1 OA Category BR (automated)",
-    if(not match("Step 1 OA Category BR (automated)",'A') and not isnull("Step 2a UKBsis.BR_OA_Status"),
-    "Step 2a UKBsis.BR_OA_Status",
-   If (Match("Sorted2bCategory",'A') and not isnull(ISSN_L_Final),"Step 1 OA Category BR (automated)",
-    
-"Sorted2bCategory"
-  
-
-))) as "Step 3 Merged"
-
+if (match("Step 1 OA Category BR (automated)",'A'), "Step 1 OA Category BR (automated)",
+if (match(Sorted1Category,'B')   ,Sorted1Category,
+if (match(Sorted2aCategory,'B')  ,Sorted2aCategory,
+if (match(Sorted2bCategory,'C')  ,Sorted2bCategory
+,Sorted1Category))))             as "Step 3 Merged" // Front end field label: "'Last step Merged Business rule OA category according to institute / Metadathub (manual)'"
 
 Resident Final;
 ;
 
+Left join (Final)
+Load
+doi
+,concat (DISTINCT "Step 2b Updated URL by institute (manual)", ' , ') as "URL by institute (concat)"
+Resident Final
+Group by doi;
+
 Final_Export:
-NoConcatenate Load *,
-ApplyMap('CategoryRankMap',"Step 3 Merged",999) as "Step 3 Rank"
-Resident Final;
+NoConcatenate Load *
+,doi as final_doi
+,If(len("URL by institute (concat)")<1 or isnull("URL by institute (concat)"), 
+    url_for_landing_page,"URL by institute (concat)") as [Merged URL UPW or Institite_temp]
+,ApplyMap('CategoryRankMap',"Step 3 Merged",999) as "Step 3 Rank"
+Resident Final
+;
+
+
+// Front end script for making sure any change in score that differs from the initial Business Rule (i.e. a change from D to C because 
+// of an institute reported score as such) for the field "Merged URL UPW or Institite":
+/* =If(
+    [Step 2a SURF.BR_OA_Status] = 'B'
+    AND [Step 3 Merged] <> [Step 1 OA Category BR (automated)],
+
+    Trim(
+        Replace(
+            [SURF.UPW DOI url],
+            '?EMAIL=J.P.G.M.COOLEN@UU.NL',
+            ''
+        )
+    ),
+
+    If(
+        wildmatch([Step 3 Merged], '*C*')
+        OR [Step 3 Merged] <> [Step 1 OA Category BR (automated)],
+
+        Trim(
+            Replace(
+                If(
+                    Match(
+                        Left(Trim([Merged URL UPW or Institite]), 2),
+                        ', '
+                    ),
+                    Trim(Mid(Trim([Merged URL UPW or Institite]), 2)),
+                    Trim([Merged URL UPW or Institite])
+                ),
+                'J.P.G.M.COOLEN@UU.NL',
+                ''
+            )
+        ),
+
+        ''
+    )
+)
+*/
+Left join (Final_Export)
+Load
+final_doi
+,concat (DISTINCT [Merged URL UPW or Institite_temp], ' , ') as [Merged URL UPW or Institite] // Front end field label: "Merged URL UPW, Institute or metadatahub if C / upgrade OA"
+Resident Final_Export
+Group by final_doi;
+
+
 
 Drop table Final;
 Drop fields 
  doi
  ,Institutional_identifier_concat
  ,Institutional_identifier_concat_inst from Cris_Final;
+ 
+Left Join (Final_Export)
+Load * 
+resident  UPW_DOI;
 
+Drop Table UPW_DOI;
 End Sub
 
 Call Mapping;
 Call CRIS;
 Call CrossRef;
-Call Returned_ISSN
 Call DOAJ;
 Call UPW;
-Call Returned;
-Call ReturnedSheet;
-Call UKBsis;
-Call FinalModel;
+Call SURF;
+Call FinalModelNew;
+Call Datahub;
+
 
 
 
