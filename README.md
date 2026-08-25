@@ -56,8 +56,8 @@ Each script is modular:
 
 ## 📂 Datasets and Resources 
 All sets and subsets can be accessed in the link below: 
+https://zenodo.org/uploads/22013457 
 
-https://doi.org/10.5281/zenodo.17358443
 
 ✍️ Maintained by SURF OA Monitor Project Team
 
