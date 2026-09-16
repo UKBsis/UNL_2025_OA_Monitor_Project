@@ -35,9 +35,9 @@ Each script is modular:
 
 ## 📊 Business Rules
 
-- **A** → Gold (article is published in a full open access journal, ISSN in DOAJ via CrossRef)  
+- **A** → Gold (article is published in a full open access journal, ISSN found in DOAJ via CrossRef lookup)  
 - **B** → Gold/Hybrid (article is published open access in a hybrid or full open access journal that is not registered in the DOAJ) verified by UPW or SURF Metadata Hub Publisher Reports  
-- **C** → Green (article is published closed access but shared open access in a repository) URL provided by UPW or the Institution 
+- **C** → Green (article is published closed access but shared open access in a repository) URL link to repository record provided by UPW or the Institution 
 - **D** → Bronze/Closed (article is published closed access or shared in bronze open access on the site of the publisher)
 - **No Cat** → DOI not found in DOAJ / UPW / CrossRef / SURF PR
 
