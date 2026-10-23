@@ -56,7 +56,7 @@ Each script is modular:
 
 ## 📂 Datasets and Resources 
 All sets and subsets can be accessed in the link below: 
-https://zenodo.org/uploads/22013457 
+https://zenodo.org/uploads/22013457
 
 
 
